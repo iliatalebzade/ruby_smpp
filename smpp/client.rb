@@ -12,7 +12,7 @@ module SMPP
     end
 
     def connect
-      @socket = TCPSocket.new @host, port
+      @socket = TCPSocket.new @host, @port
     end
 
     def bind_transmitter
