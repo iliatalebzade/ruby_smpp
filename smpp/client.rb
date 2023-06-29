@@ -36,13 +36,25 @@ module SMPP
     def make_pdu(command_name, **kwargs)
       p = pdu_factory(command_name, **kwargs)
 
-      send_pdu(p, command_name, kwargs)
+      is_sent = send_pdu(p, command_name, kwargs)
+
+      # TODO: Check if the req is send and do further work accordingly
+      # if is_sent
+
+      # else
+
+      # end
     end
 
     def send_pdu(p, command_name, kwargs)
-      generated = p.generate(kwargs, command_name)
+      binary_pdu = p.generate(kwargs, command_name)
+
+      @socket.write(binary_pdu)
+
+      return true
     end
 
+    #TODO: Implement other commands
     def pdu_factory(command_name, **kwargs)
       {
         'bind_transmitter'        => BindTransmitter

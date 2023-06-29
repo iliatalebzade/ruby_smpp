@@ -35,11 +35,12 @@ module SMPP
       command_length = body.bytesize + 16
 
       command_code = get_command_name(command_code)
+      command_status = 0x00000000  # Set the command status to a default value (e.g., success)
 
       # Structure should be as follows:
       # [command_length, command_id, command_status, sequence_number]
-      byebug
-      header = [command_length, command_code, @sequence_number, @sequence_number].pack("C")
+      # Pack the ordered array in big-endian bytes
+      header = [command_length, command_code, command_status, @sequence_number].pack("L>L>L>L>")
 
       return header + body
     end
