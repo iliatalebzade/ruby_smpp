@@ -1,18 +1,29 @@
+require_relative "constants"
+
 module SMPP
   class Client
     attr_accessor :socket, :bound, :host, :port
+
+    include Constants
 
     def initialize(host, port)
       @socket = nil
       @bound  = false
       @host   = host
       @port   = port
-
-      connect()
     end
 
     def connect
-      @socket = TCPSocket.new @host, @port
+      begin
+        @socket = TCPSocket.new @host, @port
+        puts "Connection successful!"
+        return true
+      rescue Errno::EHOSTUNREACH => e
+        puts "Error occurred: Couldn't find to the provided address."
+        return false
+      rescue Errno::ECONNREFUSED => e
+        puts "Error occurred: Connection was refused by the destination server."
+      end
     end
 
     def bind_transmitter
@@ -26,7 +37,7 @@ module SMPP
         'address_range'     => ""
       }
 
-      is_bound = bind("bind_transmitter", **config)
+      bind("bind_transmitter", **config)
     end
 
     def bind(command_name, **kwargs)
@@ -35,21 +46,34 @@ module SMPP
 
     def make_pdu(command_name, **kwargs)
       p = pdu_factory(command_name, **kwargs)
-
       is_sent = send_pdu(p, command_name, kwargs)
 
-      # TODO: Check if the req is send and do further work accordingly
-      # if is_sent
+      if is_sent
+        response = @socket.read(16)
+        received_response_code = response[4..7].unpack('L>').first
+        response_name = command_name + "_resp"
+        response_code = get_command_name(response_name)
 
-      # else
-
-      # end
+        if received_response_code == response_code
+          puts "The request was a success and acknowledged by the server!"
+        else
+          puts "Response indicates an error"
+        end
+      else
+        puts "The process of sending PDU was not successful"
+      end
     end
+
 
     def send_pdu(p, command_name, kwargs)
       binary_pdu = p.generate(kwargs, command_name)
 
-      @socket.write(binary_pdu)
+      begin
+        @socket.write(binary_pdu)
+      rescue => e
+        puts "Error occurred: #{e.class}"
+        return false
+      end
 
       return true
     end
@@ -57,8 +81,8 @@ module SMPP
     #TODO: Implement other commands
     def pdu_factory(command_name, **kwargs)
       {
-        'bind_transmitter'        => BindTransmitter
-        # 'bind_transmitter_resp'   => BindTransmitterResp,
+        'bind_transmitter'        => BindTransmitter,
+        'bind_transmitter_resp'   => BindTransmitterResp,
         # 'bind_receiver'           => BindReceiver,
         # 'bind_receiver_resp'      => BindReceiverResp,
         # 'bind_transceiver'        => BindTransceiver,

@@ -1,5 +1,3 @@
-require_relative 'constants'
-
 module SMPP
   class BindTransmitter < Command
     # Bind as a transmitter command
@@ -65,6 +63,28 @@ module SMPP
       end
 
       result
+    end
+  end
+
+  class BindTransmitterResp < Command
+    include Constants
+
+    @@params = {
+      'system_id' => Param.new(type: String, max: 16),
+      'sc_interface_version' => Param.new(type: Integer, size: 1)
+    }
+
+    @@params_order = ['system_id', 'sc_interface_version']
+
+    def initialize(command, **kwargs)
+      super(command, need_sequence: false, **kwargs)
+      _set_vars(**(Hash[@@params.keys.map { |k| [k, nil] }]))
+    end
+
+    private
+
+    def _set_vars(**kwargs)
+      kwargs.each { |k, v| instance_variable_set("@#{k}", v) }
     end
   end
 end
