@@ -2,8 +2,6 @@ module SMPP
   class BindTransmitter < Command
     # Bind as a transmitter command
 
-    include Constants
-
     @@params = {
       'system_id' => Param.new(type: String, max: 16),
       'password' => Param.new(type: String, max: 9),
@@ -32,7 +30,7 @@ module SMPP
 
       command_length = body.bytesize + 16
 
-      command_code = get_command_name(command_code)
+      command_code = Constants.get_command_name(command_code)
       command_status = 0x00000000  # Set the command status to a default value (e.g., success)
 
       # Structure should be as follows:

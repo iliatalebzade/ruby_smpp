@@ -19,12 +19,64 @@ module SMPP
         puts "Connection successful!"
         return true
       rescue Errno::EHOSTUNREACH => e
-        puts "Error occurred: Couldn't find to the provided address."
+        puts "Error occurred in connect: Couldn't find to the provided address."
         return false
       rescue Errno::ECONNREFUSED => e
-        puts "Error occurred: Connection was refused by the destination server."
+        puts "Error occurred in connect: Connection was refused by the destination server."
       end
     end
+
+    # FOR DEVELOPMENT REASONS ONLY
+    def send_message_test()
+      config = {
+        source_addr_ton: "5",
+        source_addr: "localhost",
+        dest_addr_ton: "1",
+        destination_addr: "09338883008",
+        short_message: "Hello, there!",
+      }
+
+      send_message(**config)
+    end
+
+    # def send_message(**kwargs)
+    #   # Required Arguments
+    #   # - source_addr_ton: Source address TON
+    #   # - source_addr: Source address (string)
+    #   # - dest_addr_ton: Destination address TON
+    #   # - destination_addr: Destination address (string)
+    #   # - short_message: Message text (string)
+
+    #   raise ArgumentError, 'source_addr_ton is required' unless kwargs.key?(:source_addr_ton)
+    #   raise ArgumentError, 'source_addr is required' unless kwargs.key?(:source_addr)
+    #   raise ArgumentError, 'dest_addr_ton is required' unless kwargs.key?(:dest_addr_ton)
+    #   raise ArgumentError, 'destination_addr is required' unless kwargs.key?(:destination_addr)
+    #   raise ArgumentError, 'short_message is required' unless kwargs.key?(:short_message)
+
+    #   pdu = PDU.pdu_factory('submit_sm', **kwargs)
+    #   binary_pdu = pdu.generate(kwargs, 'submit_sm')
+
+    #   begin
+    #     @socket.write(binary_pdu)
+    #   rescue => e
+    #     puts "Error occurred: #{e.class}"
+    #     return false
+    #   end
+
+    #   response = @socket.read(16)
+    #   received_response_code = response[4..7].unpack('L>').first
+    #   response_name = 'submit_sm_resp'
+    #   response_code = get_command_name(response_name)
+
+    #   if received_response_code == response_code
+    #     puts "The request was a success and acknowledged by the server!"
+    #   else
+    #     puts "Response indicates an error"
+    #   end
+
+    #   return true
+    # end
+
 
     def bind_transmitter
       config = {
@@ -41,67 +93,7 @@ module SMPP
     end
 
     def bind(command_name, **kwargs)
-      p = make_pdu(command_name, **kwargs)
-    end
-
-    def make_pdu(command_name, **kwargs)
-      p = pdu_factory(command_name, **kwargs)
-      is_sent = send_pdu(p, command_name, kwargs)
-
-      if is_sent
-        response = @socket.read(16)
-        received_response_code = response[4..7].unpack('L>').first
-        response_name = command_name + "_resp"
-        response_code = get_command_name(response_name)
-
-        if received_response_code == response_code
-          puts "The request was a success and acknowledged by the server!"
-        else
-          puts "Response indicates an error"
-        end
-      else
-        puts "The process of sending PDU was not successful"
-      end
-    end
-
-
-    def send_pdu(p, command_name, kwargs)
-      binary_pdu = p.generate(kwargs, command_name)
-
-      begin
-        @socket.write(binary_pdu)
-      rescue => e
-        puts "Error occurred: #{e.class}"
-        return false
-      end
-
-      return true
-    end
-
-    #TODO: Implement other commands
-    def pdu_factory(command_name, **kwargs)
-      {
-        'bind_transmitter'        => BindTransmitter,
-        'bind_transmitter_resp'   => BindTransmitterResp,
-        # 'bind_receiver'           => BindReceiver,
-        # 'bind_receiver_resp'      => BindReceiverResp,
-        # 'bind_transceiver'        => BindTransceiver,
-        # 'bind_transceiver_resp'   => BindTransceiverResp,
-        # 'data_sm'                 => DataSM,
-        # 'data_sm_resp'            => DataSMResp,
-        # 'generic_nack'            => GenericNAck,
-        # 'submit_sm'               => SubmitSM,
-        # 'submit_sm_resp'          => SubmitSMResp,
-        # 'deliver_sm'              => DeliverSM,
-        # 'deliver_sm_resp'         => DeliverSMResp,
-        # 'query_sm'                => QuerySM,
-        # 'query_sm_resp'           => QuerySMResp,
-        # 'unbind'                  => Unbind,
-        # 'unbind_resp'             => UnbindResp,
-        # 'enquire_link'            => EnquireLink,
-        # 'enquire_link_resp'       => EnquireLinkResp,
-        # 'alert_notification'      => AlertNotification
-      }[command_name].new(command_name, **kwargs)
+      p = PDU.make_pdu(command_name, @socket, **kwargs)
     end
   end
 end

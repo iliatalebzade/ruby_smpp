@@ -1,6 +1,6 @@
 module SMPP
   module Constants
-    def get_command_name(code)
+    def self.get_command_name(code)
       commands = {
         'generic_nack' => 0x80000000,
         'bind_receiver' => 0x00000001,
