@@ -26,6 +26,9 @@ module SMPP
 
       if is_sent
         response = socket.read(16)
+        puts "=================== response sent from the server ==================="
+        puts response
+        puts "====================================================================="
         received_response_code = response[4..7].unpack('L>').first
         response_name = command_name + "_resp"
         response_code = Constants.get_command_name(response_name)
