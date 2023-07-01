@@ -78,10 +78,10 @@ module SMPP
     # end
 
 
-    def bind_transmitter
+    def bind_transmitter(system_id = "iBus", password = "Ib179@e7")
       config = {
-        'system_id'         => "iBus",
-        'password'          => "Ib179@e7",
+        'system_id'         => system_id,
+        'password'          => password,
         'system_type'       => "",
         'interface_version' => 52,
         'addr_ton'          => 5,

@@ -5,6 +5,7 @@ require_relative 'smpp/client'
 require_relative 'smpp/param'
 require_relative 'smpp/bind_transmitter'
 require_relative 'smpp/pdu'
+require_relative 'smpp/gsm'
 
 module SMPP
   CONSTS = {

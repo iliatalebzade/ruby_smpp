@@ -37,5 +37,18 @@ module SMPP
 
       raise StandardError, "Unknown SMPP command code `#{code}`"
     end
+
+    # VARIABLES
+    SMPP_ENCODING_DEFAULT = :default
+    SMPP_ENCODING_ISO88591 = :iso88591
+    SMPP_ENCODING_ISO10646 = :iso10646
+
+    SEVENBIT_LENGTH = 160
+    EIGHTBIT_LENGTH = 140
+    UCS2_LENGTH = 70
+
+    SEVENBIT_PART_SIZE = 153
+    EIGHTBIT_PART_SIZE = 134
+    UCS2_PART_SIZE = 67
   end
 end
